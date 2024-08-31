@@ -1,0 +1,95 @@
+﻿@typeparam TItem
+@typeparam TKey where TKey : notnull
+
+<CascadingValue TValue="DataGrid<TItem, TKey>" Value="this">	
+	<table class="table">
+		<thead>
+			<tr>
+				@if (AllowDetails)
+				{
+					<th></th>
+				}
+				@foreach (var column in Columns)
+				{
+					<th>@column.Title</th>
+				}
+				<th></th>
+			</tr>
+		</thead>
+		<tbody>
+		@foreach (var keyPair in GridState)
+		{            
+			<tr>
+				@if (AllowDetails)
+				{
+					<td>
+						<button class="btn btn-link" @onclick="() => GridState[keyPair.Key] = (keyPair.Value.Item, keyPair.Value.IsEditing, !keyPair.Value.IsExpanded)">
+							@if (keyPair.Value.IsExpanded)
+							{
+								<i class="fas fa-chevron-up"></i>
+							}
+							else
+							{
+								<i class="fas fa-chevron-down"></i>
+							}
+						</button>
+					</td>
+				}
+				@foreach (var column in Columns)
+				{
+					<td>
+						@if (keyPair.Value.IsEditing && column.EditTemplate != null)
+						{
+							@column.EditTemplate(keyPair.Value.Item)
+						}
+						else
+						{
+							@column.DisplayTemplate(keyPair.Value.Item)
+						}
+					</td>
+				}
+				<td>
+
+				</td>
+			</tr>
+			if (AllowDetails && keyPair.Value.IsExpanded)
+			{
+				<tr>
+					<td colspan="@(Columns.Count + 2)">
+						@DetailTemplate!(keyPair.Value.Item)
+					</td>
+				</tr>
+			}
+		}
+		</tbody>
+	</table>	
+	@ChildContent
+</CascadingValue>
+
+@code {
+	private Dictionary<TKey, (TItem Item, bool IsEditing, bool IsExpanded)> GridState = [];
+	private bool AllowDetails => DetailTemplate != null;
+	private List<DataGridColumn<TItem, TKey>> Columns { get; set; } = [];
+
+	[Parameter] public RenderFragment ChildContent { get; set; } = default!;
+
+	[Parameter, EditorRequired]
+	public List<TItem> Data { get; set; } = [];
+
+	[Parameter, EditorRequired]
+	public Func<TItem, TKey> GetKey { get; set; } = default!;
+
+	[Parameter]
+	public RenderFragment<TItem>? DetailTemplate { get; set; }	
+
+	public void AddColumn(DataGridColumn<TItem, TKey> column) 
+	{
+		Columns.Add(column);
+		StateHasChanged();
+	}
+
+	protected override void OnParametersSet()
+	{
+		GridState = Data.ToDictionary(row => GetKey(row), row => (row, false, false));
+	}
+}

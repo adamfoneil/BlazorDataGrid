@@ -1,0 +1,48 @@
+﻿@page "/"
+
+<PageTitle>Home</PageTitle>
+
+<DataGrid TKey="int" TItem="Person" GetKey="(p) => p.Id" Data="people">
+	<DataGridColumn Title="First Name" TItem="Person" TKey="int">
+		<DisplayTemplate Context="person">
+			@person.FirstName
+		</DisplayTemplate>
+		<EditTemplate>
+			<input type="text" @bind="context.FirstName" class="form-control" />
+		</EditTemplate>
+	</DataGridColumn>
+
+	<DataGridColumn Title="Last Name" TItem="Person" TKey="int">
+		<DisplayTemplate Context="person">
+			@person.LastName
+		</DisplayTemplate>
+		<EditTemplate>
+			<input type="text" @bind="context.LastName" class="form-control" />
+		</EditTemplate>
+	</DataGridColumn>
+</DataGrid>
+
+
+@code {
+	List<Person> people = [];
+
+	protected override void OnInitialized()
+	{
+		base.OnInitialized();
+
+		people = new()
+		{
+			new Person { Id = 1, FirstName = "John", LastName = "Doe", Age = 30 },
+			new Person { Id = 2, FirstName = "Jane", LastName = "Smith", Age = 25 },
+			new Person { Id = 3, FirstName = "Bob", LastName = "Brown", Age = 40 }
+		};
+	}	
+
+	internal class Person
+	{
+		public int Id { get; set; }
+		public string FirstName { get; set; } = "";
+		public string LastName { get; set; } = "";
+		public int Age { get; set; }
+	}
+}

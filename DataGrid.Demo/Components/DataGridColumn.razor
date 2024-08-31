@@ -1,0 +1,16 @@
+﻿@typeparam TItem
+@typeparam TKey where TKey : notnull
+
+@code {
+    [CascadingParameter] public DataGrid<TItem, TKey> DataGrid { get; set; } = default!;
+    [Parameter] public string Title { get; set; } = default!;
+    [Parameter] public RenderFragment<TItem> DisplayTemplate { get; set; } = default!;
+    [Parameter] public RenderFragment<TItem> EditTemplate { get; set; } = default!;
+    [Parameter] public RenderFragment ChildContent { get; set; } = default!;
+
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+        DataGrid.AddColumn(this);
+    }
+}
